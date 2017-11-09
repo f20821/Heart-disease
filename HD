@@ -5,3 +5,8 @@ colnames(hd) <- c("age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "tha
 hd$status <- ifelse(hd$status == "0", "absence", "presence")
 hd$status <- as.factor(hd$status)
 ```
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
