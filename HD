@@ -1,0 +1,7 @@
+```{r}
+hd <- read.table("heart.disease.txt", header = FALSE, sep = ",")
+colnames(hd) <- c("age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal", "status")
+## status: "absenece" == 0, "presence" == 1-4
+hd$status <- ifelse(hd$status == "0", "absence", "presence")
+hd$status <- as.factor(hd$status)
+```
