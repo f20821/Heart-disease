@@ -4,6 +4,9 @@ colnames(hd) <- c("age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "tha
 ## status: "absenece" == 0, "presence" == 1-4
 hd$status <- ifelse(hd$status == 0, "absence", "presence")
 hd$status <- as.factor(hd$status)
+hd$ca <- as.double(hd$ca)
+hd$thal <- as.double(hd$thal)
+head(hd)
 ```
 
 ```{r}
