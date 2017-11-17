@@ -35,18 +35,28 @@ hd$status <- as.factor(hd$status)
 ##  The "goal" field refers to the presence of heart disease in the patient. It is integer valued from 0 (no presence) to 4. Experiments with the Cleveland database have concentrated on simply attempting to distinguish presence (values 1,2,3,4) from absence (value 0).
 ```
 
-## Missing Data
+## dealing with missing Data by mice()
 ```{r}
-## check if the data having missing value
-table(hd == "?")
-## turn missing value into NA
 hd[hd == "?"] <- NA
-## number of rows before removing the missing value
-nrow(hd)
-## number of rows left after removing the missing value
-nrow(hd[complete.cases(hd), ])
-## create new data (new_hd) without missing value
-new_hd <- na.omit(hd)
+##how many NAs are in the data
+library(mice)
+## check the missing data pattern
+## NAs in "ca" and "thal"
+md.pattern(hd)
+## impute missing data 
+methods(mice)
+imputed <- mice(hd, m=5, meth = 'cart',seed = 500)
+
+##check the imputed data 
+imputed$imp$ca
+imputed$imp$thal
+
+## complete dataset 
+new_hd <- complete(imputed,4)
+new_hd$ca <- as.numeric(new_hd$ca)
+new_hd$thal <- as.numeric(new_hd$thal)
+summary(new_hd)
+nrow(new_hd[is.na(new_hd), ])
 ```
 
 ## Data exploration
