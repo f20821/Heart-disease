@@ -50,7 +50,7 @@ imputed <- mice(hd, m = 5, method = "cart", seed = 500)
 imputed$imp$ca
 imputed$imp$thal
 ## complete dataset 
-new_hd <- complete(imputed,4)
+new_hd <- complete(imputed,1)
 new_hd$ca <- as.numeric(as.character(new_hd$ca))
 new_hd$thal <- as.numeric(as.character(new_hd$thal))
 summary(new_hd)
