@@ -116,7 +116,7 @@ rbind(data.frame(group = "train", train_data),
 #devtools::install_github('topepo/caret/pkg/caret')
 #caret:::nominalTrainWorkflow
 
-set.seed(42)
+set.seed(100)
 model_glm <- caret::train(age ~ .,
                           data = train_data,
                           method = "glm", 
