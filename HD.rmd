@@ -94,7 +94,7 @@ registerDoParallel(cl)
 library(caret)
 
 # training, validation and test data
-set.seed(42)
+set.seed(100)
 index <- createDataPartition(new_hd$status, p = 0.8, list = FALSE)
 train_data <- new_hd[index, ]
 test_data <- new_hd[-index, ]
