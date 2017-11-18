@@ -93,3 +93,33 @@ gather(new_hd, x, y, age:thal) %>%
     facet_wrap( ~ x, scales = "free", ncol = 3)
 
 ```
+## machine learning packages for R 
+###caret
+install.packages("doParallel")
+install.packages("caret")
+```{r}
+# configure multicore
+require(iterators)
+library(doParallel)
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+library(caret)
+
+# training, validation and test data
+set.seed(42)
+index <- createDataPartition(new_hd$status, p = 0.8, list = FALSE)
+train_data <- new_hd[index, ]
+test_data <- new_hd[-index, ]
+
+library(dplyr)
+
+rbind(data.frame(group = "train", train_data),
+      data.frame(group = "test", test_data)) %>%  
+  gather(x,y,age:thal) %>%  
+  ggplot(aes(x = y, color = group, fill = group)) + 
+    geom_density(alpha = 0.3) + 
+    facet_wrap( ~ x, scales = "free", ncol = 3) 
+```
+
+
