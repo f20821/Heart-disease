@@ -78,20 +78,6 @@ install.packages("ggplot2")
 ```{r}
 library(ggplot2)
 ggplot(new_hd, aes(x = status, fill = status)) + geom_bar()
-
-## chol data
-ggplot(new_hd, aes(x = chol)) + geom_histogram(bins = 20)
-```
-
-```{r}
-##features
-library(tidyr)
-
-gather(new_hd, x, y, age:thal) %>%
-  ggplot(aes(x = y, color = status, fill = status))+
-    geom_density(alpha = 0.6) +
-    facet_wrap( ~ x, scales = "free", ncol = 3)
-
 ```
 
 ## machine learning packages for R 
