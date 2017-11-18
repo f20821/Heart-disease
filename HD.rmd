@@ -109,4 +109,62 @@ rbind(data.frame(group = "train", train_data),
     facet_wrap( ~ x, scales = "free", ncol = 3) 
 ```
 
+```{r}
+# Regression
+#install caret package directly from github
+#install.packages("devtools")
+#devtools::install_github('topepo/caret/pkg/caret')
+#caret:::nominalTrainWorkflow
+
+set.seed(42)
+model_glm <- caret::train(age ~ .,
+                          data = train_data,
+                          method = "glm", 
+                          preProcess = c("scale","center"),
+                          trControl = trainControl(method = "repeatedcv",
+                                                   number = 10,
+                                                   repeats = 10,
+                                                   savePredictions = TRUE,
+                                                   verboseIter = FALSE))
+model_glm
+#RMSE a measure of accuracy. smaller, better
+#Rsquared more close to 1, stronger predictive power
+#MAE mean absolute error smaller, better
+
+#  RMSE      Rsquared   MAE     
+#  7.644752  0.3169356  6.292507
+```
+
+install.packages("magrittr")
+```{r}
+# The pipe operator %>% was introduced to "decrease development time and to improve readability and maintainability of code. install package for %>%
+
+library(magrittr)
+library(ggplot2)
+
+predictions <- predict(model_glm, test_data)
+# model_glm$finalModel$linear.predictors == model_glm$finalMore$fitted.values
+data.frame(residuals = resid(model_glm),
+           predictors = model_glm$finalModel$linear.predictors)%>%
+  ggplot(aes(x = predictors, y = residuals)) +
+    geom_jitter() +
+    geom_smooth(method = "lm")
+```
+
+```{r}
+# y == train_data$age
+data.frame(residuals = resid(model_glm),
+           y = model_glm$finalModel$y) %>%
+  ggplot(aes(x = y, y = residuals)) +
+    geom_jitter() +
+    geom_smooth(method = "lm")
+```
+
+```{r}
+data.frame(actual = test_data$chol,
+           predicted = predictions)%>%
+  ggplot(aes(x = actual, y = predicted)) +
+  geom_jitter() +
+  geom_smooth(method = "lm") 
+```
 
