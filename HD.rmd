@@ -1,9 +1,6 @@
 ```{r}
 hd <- read.table("heart.disease.txt", header = FALSE, sep = ",")
 colnames(hd) <- c("age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal", "status")
-## status: "absenece" == 0, "presence" == 1-4
-hd$status <- ifelse(hd$status == 0, "absence", "presence")
-hd$status <- as.factor(hd$status)
 ```
 
 ```{r}
@@ -35,18 +32,44 @@ hd$status <- as.factor(hd$status)
 ##  The "goal" field refers to the presence of heart disease in the patient. It is integer valued from 0 (no presence) to 4. Experiments with the Cleveland database have concentrated on simply attempting to distinguish presence (values 1,2,3,4) from absence (value 0).
 ```
 
-## Missing Data
+## dealing with missing Data by mice()
 ```{r}
-## check if the data having missing value
-table(hd == "?")
+library(mice)
 ## turn missing value into NA
 hd[hd == "?"] <- NA
-## number of rows before removing the missing value
-nrow(hd)
-## number of rows left after removing the missing value
-nrow(hd[complete.cases(hd), ])
-## create new data (new_hd) without missing value
-new_hd <- na.omit(hd)
+
+md.pattern(hd)
+#visualization of NA: only ca and thal have NA
+library(VIM)
+aggr(hd, col=c('navyblue','yellow'), numbers=TRUE, 
+      labels=names(hd), cex.axis=.7, gap=3, 
+      ylab=c("Missing data","Pattern"))
+## impute the missing data
+imputed <- mice(hd, m = 5, method = "cart", seed = 500)
+##check the imputed data 
+imputed$imp$ca
+imputed$imp$thal
+## complete dataset 
+new_hd <- complete(imputed,1)
+new_hd$ca <- as.numeric(as.character(new_hd$ca))
+new_hd$thal <- as.numeric(as.character(new_hd$thal))
+summary(new_hd)
+nrow(new_hd[is.na(new_hd), ])
+```
+
+## categorical value into factor
+```{r} 
+new_hd$sex <- factor(new_hd$sex, labels = c("female", "male"))
+new_hd$cp <- factor(new_hd$cp, labels = c("typical", "atypical", "non-anginal", "asymptomatic"))
+new_hd$fbs <- factor(new_hd$fbs, labels = c("False", "True"))
+new_hd$restecg <- factor(new_hd$restecg, labels = c("normal", "abnorm", "hyper"))
+new_hd$exang <- factor(new_hd$exang, labels = c("no", "yes"))
+new_hd$slope <- factor(new_hd$slope, labels = c("up", "flat", "down"))
+new_hd$ca <- as.factor(new_hd$ca)
+new_hd$thal <- factor(new_hd$thal, labels = c("norm", "fix", "rev"))
+## status: "absenece" == 0, "presence" == 1-4
+new_hd$status <- ifelse(new_hd$status == 0, "absence", "presence")
+new_hd$status <- as.factor(new_hd$status)
 ```
 
 ## Data exploration
@@ -69,6 +92,35 @@ gather(new_hd, x, y, age:thal) %>%
     geom_density(alpha = 0.6) +
     facet_wrap( ~ x, scales = "free", ncol = 3)
 
+```
+
+## machine learning packages for R 
+###caret
+install.packages("doParallel")
+install.packages("caret")
+```{r}
+# configure multicore
+require(iterators)
+library(doParallel)
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+library(caret)
+
+# training, validation and test data
+set.seed(42)
+index <- createDataPartition(new_hd$status, p = 0.8, list = FALSE)
+train_data <- new_hd[index, ]
+test_data <- new_hd[-index, ]
+
+library(dplyr)
+
+rbind(data.frame(group = "train", train_data),
+      data.frame(group = "test", test_data)) %>%  
+  gather(x,y,age:thal) %>%  
+  ggplot(aes(x = y, color = group, fill = group)) + 
+    geom_density(alpha = 0.3) + 
+    facet_wrap( ~ x, scales = "free", ncol = 3) 
 ```
 
 ```{r}
@@ -129,3 +181,4 @@ data.frame(actual = test_data$chol,
   geom_jitter() +
   geom_smooth(method = "lm") 
 ```
+
